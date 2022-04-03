@@ -41,7 +41,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		return "", err
 	}
 
-	accessToken := token.NewWithClaims(token.SigningMethodHS256, &tokenClaims{
+	accessToken := token.NewWithClaims(token.SigningMethodHS512, &tokenClaims{
 		token.StandardClaims{
 			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),

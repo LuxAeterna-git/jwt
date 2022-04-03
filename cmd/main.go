@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/LuxAeterna-git/jwt"
 	"github.com/LuxAeterna-git/jwt/pkg/handler"
 	"github.com/LuxAeterna-git/jwt/pkg/repository"
@@ -9,6 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -34,7 +38,14 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(jwt.Server)
-	if err := srv.Run("8000", handlers.InitRoutes()); err != nil {
-		log.Fatalf("error while runningserver: %s", err.Error())
-	}
+	go func() {
+		if err := srv.Run("8000", handlers.InitRoutes()); err != nil {
+			log.Fatalf("error while runningserver: %s", err.Error())
+		}
+	}()
+	fmt.Println("\n*******\n Server running on port 8000 \n*******\n")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
 }
