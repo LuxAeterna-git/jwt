@@ -6,8 +6,10 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(user jwt.User) (int, error)
+	CreateUser(user jwt.User) (string, error)
 	GenerateToken(username, password string) (string, error)
+	GenerateRefreshToken() (string, error)
+	ParseToken(token string) (string, error)
 }
 
 type Service struct {

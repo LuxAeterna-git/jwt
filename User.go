@@ -1,8 +1,10 @@
 package jwt
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type User struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ID       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
+	Name     string             `json:"name"`
+	Username string             `json:"username"`
+	Password string             `json:"password"`
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(user jwt.User) (int, error)
+	CreateUser(user jwt.User) (string, error)
 	GetUser(username, password string) (jwt.User, error)
 }
 

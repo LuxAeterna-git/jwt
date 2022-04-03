@@ -32,10 +32,16 @@ func (h *Handler) signIn(c *gin.Context) {
 	if err := c.BindJSON(&input); err != nil {
 		log.Println(err)
 	}
-	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
+	accessToken, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
+	refreshToken, err := h.services.Authorization.GenerateRefreshToken()
 	if err != nil {
 		log.Println(err)
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{"token": token})
+	c.JSON(http.StatusOK, map[string]interface{}{"accessToken": accessToken, "refreshToken": refreshToken})
+}
+
+func (h *Handler) Hello(c *gin.Context) {
+
+	c.JSON(http.StatusOK, map[string]interface{}{"Hello!": "Its working!"})
 }

@@ -1,7 +1,10 @@
 package service
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/LuxAeterna-git/jwt"
 	"github.com/LuxAeterna-git/jwt/pkg/repository"
@@ -16,7 +19,7 @@ const (
 
 type tokenClaims struct {
 	token.StandardClaims
-	userName string
+	userId string
 }
 
 type AuthService struct {
@@ -27,7 +30,7 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user jwt.User) (int, error) {
+func (s *AuthService) CreateUser(user jwt.User) (string, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
@@ -38,16 +41,44 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		return "", err
 	}
 
-	authToken := token.NewWithClaims(token.SigningMethodHS256, &tokenClaims{
+	accessToken := token.NewWithClaims(token.SigningMethodHS256, &tokenClaims{
 		token.StandardClaims{
 			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		user.Username,
+		user.ID.String(),
 	})
-	return authToken.SignedString([]byte(signingKey))
+	return accessToken.SignedString([]byte(signingKey))
 }
 
+func (s *AuthService) GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+func (s *AuthService) ParseToken(accessToken string) (string, error) {
+	access, err := token.ParseWithClaims(accessToken, &tokenClaims{}, func(t *token.Token) (interface{}, error) {
+		if _, ok := t.Method.(*token.SigningMethodHMAC); !ok {
+			return "", errors.New("Wrong token")
+		}
+		return []byte(signingKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := access.Claims.(*tokenClaims)
+	if !ok {
+		return "", errors.New("Wrong token")
+	}
+
+	return claims.userId, nil
+
+}
 func generatePasswordHash(password string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
