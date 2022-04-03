@@ -4,11 +4,11 @@ You can sig-up with your name and password and then test your access token.
 
 ## How to use it?
 Run from root directory:
-    ```shell
+    ```
     make run-db
     ```
 Then:
-    ```shell
+    ```
     make run
     ```
    
