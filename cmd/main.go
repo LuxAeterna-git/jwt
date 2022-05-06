@@ -18,7 +18,6 @@ import (
 
 func main() {
 	//connect with mongoDB
-	//connect with mongoDB
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	ctx1, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
